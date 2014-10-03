@@ -1,0 +1,17 @@
+#ifndef CARD_H
+#define CARD_H
+
+class Card
+{
+	private:
+		char _deck[2][40];
+		int _topcard0;
+		int _topcard1;
+	public:
+		Card();
+		void shuffle();
+		char draw(int type);
+		void output(int type);
+};
+
+#endif

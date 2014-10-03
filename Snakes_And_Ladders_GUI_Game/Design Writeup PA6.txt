@@ -1,0 +1,321 @@
+System Name: Pitfalls and Ladders
+
+System Description: 
+The system is to simulate a board game concept where two to four players race through forty tiles to reach the end using a simulated dice for movement.
+IF the player rolls a number that would take them past the final tile, then they would go forward to the final tile and then move backwards based on how many movements they have left.
+
+NOTES: The labels for each tile is displayed in a "LEGEND" which can be opened on the bottom left menu in-game. Crowley OK'd this :)
+
+Function Descriptions:
+
+Function Name: main
+
+	-Function formal parameters and type: none
+	-Function Return Type: int 
+	-Function Description: Displays the main window
+
+		
+HOW TO COMPILE:
+
+	qmake -project
+	qmake
+	make
+	./PA6
+
+Class Descriptions:
+
+Class Name: Game
+
+	Method Name: Game
+		
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Sets up all the qt widgets, buttons, labels, etc. 
+
+	Method Name: Display_Number_Players
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Displays the three buttons prompting the user to enter how many players will play the game
+
+	Method Name: Set_Names_Two
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Sets the game to two players
+
+	Method Name: Set_Names_Three
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Sets the game to three players
+
+	Method Name: Set_Names_Four
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Sets the game to four players
+
+	Method Name: Name_Input
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Displays a lineedit that prompts the user to enter the names for all the players
+
+	Method Name: Set_Name
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Stores the data entered from Name_Input
+
+	Method Name: Pick_Class
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Displays all the buttons for all the characters the players can choose from
+
+	Method Name: Check_Class_Button
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Stores the data of the character the player selected into the player class
+
+
+	Method Name: Begin_Game
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Calls to the board function to update the board, calls the Dice_Roll, and checks for victory by calling Victory_Check
+
+	Method Name: Dice_Roll
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Rolls a dice, moves the player, and calls a space class to check for any special tiles the players land on
+
+	Method Name: Victory_Check
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Checks if a player is the only player left or is on tile number 40
+
+	Method Name: Player_Quit
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Kicks out the current turn's player
+
+	Method Name: Check_Player_Turn
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Checks to see whose turn is it, useful for players who forfeit the game and the game has to skip a player's turn because he is not in the game anymore
+
+	Method Name: Yes
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: When a user is on a shop tile and given a choice to buy a card, this yes will activate the shop card's effect given that the player has enough money
+
+	Method Name: No
+		
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: When a user is prompted to buy an item from the shop, this button refuses the transaction and no effect will take place
+
+
+Class Name: Board
+
+	Method Name: Board
+		
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Does nothing
+		
+	Method Name: Draw_Player_Position
+
+		-Method formal parameters and type: Player player[4], QLabel *labelPlayerIcon[4], int num_players
+		-Method Return Type: void
+		-Method Description: Draws each player's positions on the GUI
+
+	Method Name: Update_Status
+		
+		-Method formal parameters and type: QLabel *labelPlayerNumber[4], QLabel *labelPlayerName[4], QLabel *labelPlayerCharacter[4], QLabel *labelPlayerPosition[4], QLabel *labelPositionDisplay[4], QLabel *labelPlayerCurrency[4], QLabel *labelCurrencyDisplay[4], int num_players, Player player[4], QString stringName[4], bool player_active[4]
+		-Method Return Type: void
+		-Method Description: Takes in a whole bunch of data to update the board GUI with updated information, such as player's currency
+		
+
+Class Name: Player
+
+	Method Name: Player
+	
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Initializes all the necessary variables within Player
+		
+	Method Name: label
+	
+		-Method formal parameters and type: char name[8], int job
+		-Method Return Type: void
+		-Method Description: Takes the arguments and copies the information to the player class\s
+		
+	Method Name: addposition
+	
+		-Method formal parameters and type: int position
+		-Method Return Type: void
+		-Method Description: Adds the argument value to to the player's current position
+		-Compiling and Testing:
+			If player's position is 50, and the argument is 3, then the player's new position is 53
+		
+	Method Name: setposition
+	
+		-Method formal parameters and type: int position
+		-Method Return Type: void
+		-Method Description: Sets the player's current position to the value in the given argument 
+		-Compiling and Testing:
+			If the argument is 50, then the player's new position is 50
+		
+	Method Name: currentposition
+	
+		-Method formal paramters and type: None
+		-Method Return Type: int
+		-Method Description: Returns the value of the player's current position
+		-Compiling and Testing:
+			Returns 40 is the player's current position is 40
+		
+	Method Name: addcurrency
+	
+		-Method formal parameters and type: int currency
+		-Method Return Type: void
+		-Method Description: Adds to the player's currency
+		-Compiling and Testing:
+			If the argument is 5, and the player has 40 money, then the player now has 45 money
+		
+	Method Name: subcurrency
+	
+		-Method formal parameters and type: int currency
+		-Method Return Type: void
+		-Method Description: Subtracts the player's currency with the argument value
+		-Compiling and Testing:
+			If the argument is 5, and the player has 40 money, then the player now has 35 money
+		
+	Method Name: currentcurrency
+	
+		-Method formal parameters and type: None
+		-Method Return Type: int
+		-Method Description: Returns the value of the player's currency
+		
+	Method Name: outputjob
+	
+		-Method formal parameters and type: None
+		-Method Return Type: Void
+		-Method Description: Depending on the player's job index, output the symbol for the job
+		-Compiling and Testing:
+			If the player has an assigned job index of 5, then the method outputs "0" for the Apparition class
+		
+	Method Name: outputjobindex
+	
+		-Method formal parameters and type: None
+		-Method Return Type: int
+		-Method Description: Returns the job index of the player
+		
+	Method Name: checkvictory
+	
+		-Method formal parameters and type: None
+		-Method Return Type: bool
+		-Method Description: Checks if the player is on the final tile. If so, return true. If not, return false.
+		
+
+Class Name: Space
+
+	Method Name: Space
+	
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Labels all the special tiles on the board
+		
+	Method Name: checkspace
+	
+		-Method formal parameters and type: int position
+		-Method Return Type: int
+		-Method Description: Checks the space a player is on, reacts accordingly, and returns the value of the player's new location
+		-Compiling and Testing:
+			If the player lands on a ladder tile, then the method checkspace will execute an algorithm that will move the player upward on the board based on his current location
+		
+	Method Name: spacetype
+	
+		-Method formal parameters and type: int position
+		-Method Return Type: char 
+		-Method Description: returns a letter that is associated with the current position that is given by the argument
+		-Compiling and Testing:
+			If position is 39, then return the char "F"
+			
+	//Method Name: outputbank
+	
+		-Method formal parameters and type: int position
+		-Method Return Type: char 
+		-Method Description: returns a letter that is associated with the current position that is given by the argument
+		-Compiling and Testing:
+			If position is 39, then return the char "F"
+			
+		
+Class Name: Bank
+
+	Method Name: Bank
+	
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Sets the starting amount of the bank to 4000
+		
+	Method Name: settotal
+	
+		-Method formal parameters and type: int amount
+		-Method Return Type: void
+		-Method Description: Makes the bank amount equal to the amount given in the argument
+		-Compiling and Testing:
+			if int amount is 6000, then _amount of the Bank class is equal to 6000
+		
+	Method Name: deposit
+	
+		-Method formal parameters and type: int amount
+		-Method Return Type: int
+		-Method Description: Returns the amount that has been added by the argument
+		-Compiling and Testing:	
+			if _amount is 500 and the argument is 50, then return 550
+		
+	Method Name: withdraw
+	
+		-Method formal parameters and type: int amount
+		-Method Return Type: int
+		-Method Description: Returns the amount that has been subtracted by the argument
+		-Compiling and Testing:
+			if _amount is 500 and the argument is 50, then return 450
+		
+
+Class Name: Card
+
+	Method Name: Card
+	
+		-Method formal parameters and type: None
+		-Method Return Type: Constructor
+		-Method Description: Sets up all the card types and builds the deck
+		
+	Method Name: shuffle
+	
+		-Method formal parameters and type: None
+		-Method Return Type: void
+		-Method Description: Shuffles the deck array
+		
+	Method Name: draw
+	
+		-Method formal parameters and type: int type
+		-Method Return Type: char
+		-Method Description: Returns the top card in the array and shifts the array
+		
+	Method Name: output
+	
+		-Method formal parameters and type: int type
+		-Method Return Type: void
+		-Method Description: Outputs whatever the top card is
+		
+

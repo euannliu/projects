@@ -1,0 +1,233 @@
+		if(position==_tileposition[2][counter]) //Shop - Players can draw a shop card. This section checks if the player has enough money and then acts
+		{
+			labelText -> setText("Buy?");
+			card=_deck.draw(0);
+			if(card=='D')
+			{
+				cout << "\nDREW A SHOP CARD!\nThe Double Roll Card gives you another turn!\nIt costs 200 coins.\n";
+			   do{ //Do-While to accept false inputs; if user enters something other than Y/N, then re-prompt user
+				check=0;
+				cout << "Buy? (Y/N): ";
+				cin >> input;
+				if(input=='Y'||input=='y')
+				{
+					if(player.currentcurrency()>=200)
+					{
+						player.subcurrency(200);
+						_bank.deposit(200);
+						dicenumber=_dice.singleroll();
+						cout << "\nYOU ROLLED A " << dicenumber << endl;
+						cout << endl;
+ 						player.outputname();
+						if(dicenumber+dicenumber_change>1)
+						{
+							cout << " MOVES " << dicenumber+dicenumber_change << " SPACES";
+						}
+						else
+						{
+							cout << " MOVES " << dicenumber+dicenumber_change << " SPACE";
+						}
+						if(player.currentposition()+dicenumber+dicenumber_change>=40)
+						{
+							dicenumber=(player.currentposition()+dicenumber+dicenumber_change)-39;
+							player.setposition(39-dicenumber+dicenumber_change);				
+						}
+						else
+						{
+							player.addposition(dicenumber+dicenumber_change);
+						}
+						checkspace(player.currentposition(),player,player_next,player_next2,player_next3,event_index,dicenumber_change,labelPlayerIcon,labelText,animate,labelEvent,buttonYes,buttonNo,buttonDice);
+					}
+					else
+					{
+						cout << "Not enough coins.";
+					}
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else if(input=='N'||input=='n')
+				{
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else
+				{
+					check=1;
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+			   }while(check==1);
+				
+			}
+			else if(card=='P')
+			{
+				cout << "\nDREW A SHOP CARD!\nThe Pushback Card halves all other players' positions!\nIt costs 300 coins.\n";
+			   do{
+				check=0;
+				cout << "Buy? (Y/N): ";
+				cin >> input;
+				if(input=='Y'||input=='y')
+				{
+					if(player.currentcurrency()>=300)
+					{
+						player.subcurrency(300);
+						_bank.deposit(300);
+						cout << endl;
+						player_next.outputname();
+						cout << " got pushed back from tile number " << player_next.currentposition();
+						player_next.setposition(player_next.currentposition()/2);
+						cout << " to " << player_next.currentposition();
+						cout << endl;
+						player_next2.outputname();
+						cout << " got pushed back from tile number " << player_next2.currentposition();
+						player_next2.setposition(player_next2.currentposition()/2);
+						cout << " to " << player_next2.currentposition();
+						cout << endl;
+						player_next3.outputname();
+						cout << " got pushed back from tile number " << player_next3.currentposition();
+						player_next3.setposition(player_next3.currentposition()/2);
+						cout << " to " << player_next3.currentposition();
+					}
+					else
+					{
+						cout << "Not enough coins.";
+					}
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else if(input=='N'||input=='n')
+				{
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else
+				{
+					check=1;
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+			   }while(check==1);
+				
+			}
+			else if(card=='M')
+			{
+				cout << "\nDREW A SHOP CARD!\nThe Money steal card robs all other players' coins!\nIt costs 500 coins.\n";
+			   do{
+				check=0;
+				cout << "Buy? (Y/N): ";
+				cin >> input;
+				if(input=='Y'||input=='y')
+				{
+					if(player.currentcurrency()>=500)
+					{
+						player.subcurrency(500);
+						_bank.deposit(500);
+						_bank.deposit(player_next.currentcurrency());
+						_bank.deposit(player_next2.currentcurrency());
+						_bank.deposit(player_next3.currentcurrency());
+						player_next.subcurrency(player_next.currentcurrency());
+						player_next2.subcurrency(player_next2.currentcurrency());
+						player_next3.subcurrency(player_next3.currentcurrency());
+						cout << "\nCurse fell upon the other players' wallets";
+					}
+					else
+					{
+						cout << "Not enough coins.";
+					}
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else if(input=='N'||input=='n')
+				{
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else
+				{
+					check=1;
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+			   }while(check==1);
+				
+			}
+			else
+			{
+				cout << "\nDREW A SWAP CARD!\nThe Swap Card trades your position with whoever is in first place!\nIt costs 300 coins.\n";
+			   do{
+				check=0;
+				cout << "Buy? (Y/N): ";
+				cin >> input;
+				if(input=='Y'||input=='y')
+				{
+					if(player.currentcurrency()>=300)
+					{
+						player.subcurrency(300);
+						_bank.deposit(300);
+						check=0;
+						if(check<player.currentposition())
+						{
+							check=player.currentposition();
+							player_hold.label(dummy,player.outputjobindex());
+						}
+						if(check<player_next.currentposition())
+						{
+							check=player_next.currentposition();
+							player_hold.label(dummy,player_next.outputjobindex());
+						}
+						if(check<player_next2.currentposition())
+						{
+							check=player_next2.currentposition();
+							player_hold.label(dummy,player_next2.outputjobindex());
+						}
+						if(check<player_next3.currentposition())
+						{
+							check=player_next3.currentposition();
+							player_hold.label(dummy,player_next3.outputjobindex());
+						}
+						
+						if(player_hold.outputjobindex()==player.outputjobindex())
+						{
+							cout << "\nGreat! You swapped with yourself!\n";
+							player.setposition(player.currentposition());
+						}
+						else if(player_hold.outputjobindex()==player_next.outputjobindex())
+						{
+							cout << "\nPlayers have been swapped\n";
+							player_next.setposition(player.currentposition());
+						}
+						else if(player_hold.outputjobindex()==player_next2.outputjobindex())
+						{
+							cout << "\nPlayers have been swapped\n";
+							player_next2.setposition(player.currentposition());
+						}
+						else if(player_hold.outputjobindex()==player_next3.outputjobindex())
+						{
+							cout << "\nPlayers have been swapped\n";
+							player_next3.setposition(player.currentposition());
+						}
+
+						player.setposition(check);
+					}
+					else
+					{
+						cout << "Not enough coins.";
+					}
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else if(input=='N'||input=='n')
+				{
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+				else
+				{
+					check=1;
+					cin.clear();
+					cin.ignore(1000,'\n');
+				}
+			   }while(check==1);
+				
+			}
+		}

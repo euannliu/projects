@@ -1,0 +1,1020 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <QApplication>
+#include <QPushButton>
+#include <QWidget>
+#include <QMainWindow>
+#include <QFont>
+#include <QtGui>
+#include <QPalette>
+#include <QLineEdit>
+
+#include "game.h"
+#include "board.h"
+#include "card.h"
+#include "player.h"
+#include "bank.h"
+#include "space.h"
+
+using namespace std;
+
+Game::Game()
+{
+	//Setting Window Size and fixing it
+	resize(800,640);
+	setFixedSize(size());
+
+	pixmapTitle = new QPixmap("gfx/Title.png"); //Title Graphic
+	pixmapTitle->scaled(800,600);
+
+	pixmapEmpty = new QPixmap("gfx/Empty.png"); //Empty Graphic
+	pixmapEmpty->scaled(800,600);
+
+	pixmapBoard = new QPixmap("gfx/Board.png"); //Board Graphic
+	pixmapBoard->scaled(800,600);
+
+	labelDisplay = new QLabel(this);  //Label for the Main Front Graphic
+	labelDisplay -> setPixmap(*pixmapTitle);
+	labelDisplay -> setFixedSize(pixmapTitle->size());
+
+	widgetTextbar = new QWidget(this); //Creates the bottom text bar
+	widgetTextbar -> resize(800,40);
+	widgetTextbar -> move(0,560);
+
+	animate = new QPropertyAnimation(this);
+
+	//labelText is used as the main text output display
+	labelText = new QLabel("Welcome to Pitfall and Ladders: the Board Game",widgetTextbar); 
+	labelText -> setGeometry(0,0,800,40);
+	labelText -> setAlignment(Qt::AlignCenter);
+
+	widgetTaskbar = new QWidget(this); //Creates the bottom menu bar
+	widgetTaskbar -> resize(800,40);
+	widgetTaskbar -> move(0,600);
+
+	paletteBlack = new QPalette(palette()); //Coloring the taskbar on the bottom
+	paletteBlack -> setColor(QPalette::Background, Qt::black);
+	widgetTaskbar -> setAutoFillBackground(true);
+	widgetTaskbar -> setPalette(*paletteBlack);
+
+	//Initializing a bunch of graphics
+	for(int i=0;i<4;i++)
+	{
+		labelPlayerIcon[i] = new QLabel(this);
+		labelPlayerCharacter[i] = new QLabel(this);
+		labelPlayerCurrency[i] = new QLabel(this);
+		labelPlayerName[i] = new QLabel(this);
+		labelPlayerNumber[i] = new QLabel(this);
+		labelPlayerPosition[i] = new QLabel(this);
+		labelPlayerVictory[i] = new QLabel(this);
+		labelPlayerVictory[i] -> move(0,4000);
+		labelCurrencyDisplay[i] = new QLabel(this);
+		labelPositionDisplay[i] = new QLabel(this);
+		pixmapPlayerIcon[i] = new QPixmap();
+		player_active[i]=false;
+	}
+
+	labelPlayerVictory[0] -> setText("Player 1 Wins!");
+	labelPlayerVictory[1] -> setText("Player 2 Wins!");
+	labelPlayerVictory[2] -> setText("Player 3 Wins!");
+	labelPlayerVictory[3] -> setText("Player 4 Wins!");
+
+	//Preparing a singal mapper for Selecting a Class
+	mapperSignal = new QSignalMapper(this);
+	for(int i=0;i<10;i++)
+	{
+		buttonClass[i] = new QPushButton(this);
+		mapperSignal -> setMapping (buttonClass[i],i);
+		connect(buttonClass[i], SIGNAL(clicked()), mapperSignal, SLOT(map()));
+		connect(buttonClass[i], SIGNAL(clicked()), this, SLOT(Pick_Class()));
+		connect(mapperSignal, SIGNAL(mapped(int)), this, SLOT(Check_Class_Button(int)));
+		buttonClass[i] -> move (0,4000);
+	}
+
+	//Buttons "yes" and "no" for buying items
+	buttonYes = new QPushButton("Yes",this);
+	buttonYes -> setGeometry(501,570,75,24);
+	connect(buttonYes,SIGNAL(clicked()),this,SLOT(Yes()));
+	buttonYes -> hide();
+
+	buttonNo = new QPushButton("No",this);
+	buttonNo -> setGeometry(224,570,75,24);
+	connect(buttonNo,SIGNAL(clicked()),this,SLOT(No()));
+	buttonNo -> hide();
+
+	//Quit Button
+	buttonQuit = new QPushButton("Quit",widgetTaskbar);
+	buttonQuit -> setGeometry(680,8,100,24);
+	connect(buttonQuit, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+	//New Game Button
+	buttonStart = new QPushButton("New Game",widgetTaskbar);
+	buttonStart->setGeometry(20,8,100,24);
+	connect(buttonStart, SIGNAL(clicked()), this, SLOT(Display_Number_Players()));
+
+	//Roll the dice button
+	buttonDice = new QPushButton(widgetTaskbar);
+	buttonDice -> setGeometry(0,400,200,30);
+	connect(buttonDice, SIGNAL(clicked()), this, SLOT(Dice_Roll()));
+
+	//Player Forfeiting buton
+	buttonPlayerQuit = new QPushButton("Player Quit", widgetTaskbar);
+	buttonPlayerQuit -> setGeometry(0,400,100,24);
+	connect(buttonPlayerQuit, SIGNAL(clicked()), this, SLOT(Player_Quit()));
+
+	//Creating the graphic to display whos turn it is
+	labelTurn = new QLabel(this);
+	labelTurn -> setGeometry(0,0,176,16);
+	labelTurn -> setPixmap(QPixmap("gfx/Turn.png"));
+	labelTurn -> hide();
+
+	//To draw the EVENT cards
+	labelEvent = new QLabel(this);
+	labelEvent -> setGeometry(24,232,96,128);
+	labelEvent -> hide();
+
+	//To draw the SHOP cards
+	labelShop = new QLabel(this);
+	labelShop -> setGeometry(304,172,192,256);
+	labelShop -> hide();
+
+	//To draw the legend that is used to show what tile is what
+	labelLegend = new QLabel(this);
+	labelLegend -> setGeometry(0,344,208,256);
+	labelLegend -> setPixmap(QPixmap("gfx/Legend.png"));
+	labelLegend -> hide();
+	buttonLegendOpen = new QPushButton("Open Legend", widgetTaskbar);
+	buttonLegendOpen -> setGeometry(20,8,100,24);
+	buttonLegendClose = new QPushButton("Close Legend", widgetTaskbar);
+	buttonLegendClose -> setGeometry(20,8,100,24);
+	buttonLegendOpen -> hide();
+	buttonLegendClose -> hide();
+	connect(buttonLegendOpen, SIGNAL(clicked()), buttonLegendOpen, SLOT(hide()));
+	connect(buttonLegendOpen, SIGNAL(clicked()), buttonLegendClose, SLOT(show()));
+	connect(buttonLegendOpen, SIGNAL(clicked()), labelLegend, SLOT(show()));
+	connect(buttonLegendClose, SIGNAL(clicked()), buttonLegendClose, SLOT(hide()));
+	connect(buttonLegendClose, SIGNAL(clicked()), buttonLegendOpen, SLOT(show()));
+	connect(buttonLegendClose, SIGNAL(clicked()), labelLegend, SLOT(hide()));
+
+	//The GUI dice display
+	labelDice = new QLabel(this);
+	labelDice -> setGeometry(0,400,32,32);
+
+	//Some random variables necessary for arrays and recursive functions
+	index=0;
+	turn_num=0;
+	counter_Pick_Class = -1;
+	card_value = 'X';
+	event_index=0;
+}
+
+void Game::Display_Number_Players()
+{
+	//Two players
+	buttonTwo = new QPushButton("2",widgetTaskbar); 
+	buttonTwo->setGeometry(20,8,100,24);
+	buttonTwo->show();
+	connect(buttonTwo, SIGNAL(clicked()), this, SLOT(Set_Names_Two()));
+	connect(buttonTwo, SIGNAL(clicked()), this, SLOT(Name_Input()));
+
+	//Three players
+	buttonThree = new QPushButton("3",widgetTaskbar); 
+	buttonThree->setGeometry(140,8,100,24);
+	buttonThree->show();
+	connect(buttonThree, SIGNAL(clicked()), this, SLOT(Set_Names_Three()));
+	connect(buttonThree, SIGNAL(clicked()), this, SLOT(Name_Input()));
+
+	//Four players
+	buttonFour= new QPushButton("4",widgetTaskbar);
+	buttonFour->setGeometry(260,8,100,24);
+	buttonFour->show();
+	connect(buttonFour, SIGNAL(clicked()), this, SLOT(Set_Names_Four()));
+	connect(buttonFour, SIGNAL(clicked()), this, SLOT(Name_Input()));
+
+	//Whenever I move buttons, it usually means I am moving them off-screen to hide them. For SOME REASON, hide() doesn't always work :/
+	buttonStart -> move(0,400); 
+	labelText -> setText ("How Many Players?");
+}
+
+void Game::Set_Names_Two()
+{
+	labelText -> setText ("Enter your name (8 char max)");
+	num_players=2;
+	//cout << "Chose " << num_players << " players" << endl;
+}
+void Game::Set_Names_Three()
+{
+	labelText -> setText ("Enter your name (8 char max)");
+	num_players=3;
+	//cout << "Chose " << num_players << " players" <<  endl;
+}
+void Game::Set_Names_Four()
+{
+	labelText -> setText ("Enter your name (8 char max)");
+	num_players=4;
+	//cout << "Chose " << num_players << " players" << endl;
+}
+
+void Game::Name_Input()
+{
+	buttonTwo -> move(0,400);
+	buttonThree -> move(0,400);
+	buttonFour -> move(0,400);
+
+	//Used to input the name
+	lineName = new QLineEdit(widgetTaskbar);
+	lineName -> setGeometry(250,8,300,24);
+	lineName -> setMaxLength(8);
+	lineName -> show();
+	lineName -> setFocus();
+	connect(lineName, SIGNAL(returnPressed()), this, SLOT(Set_Name()));
+
+	//Used to confirm the name
+	buttonOkay = new QPushButton("Okay", widgetTaskbar);
+	buttonOkay -> setGeometry(565,8,75,24);
+	connect(buttonOkay, SIGNAL(clicked()), this, SLOT(Set_Name()));
+	buttonOkay -> show();
+
+	//Prompting the player
+	labelPlayer = new QLabel("Player 1's Name:",widgetTaskbar);
+	labelPlayer -> setGeometry(125,8,150,24);
+	labelPlayer -> show();
+}
+
+void Game::Set_Name()
+{
+	//For testing if each player is still in the game
+	for(int i=0;i<num_players;i++)
+	{
+		player_active[i]=true;
+	}
+
+	lineName -> setFocus();
+	if(index==0)
+	{
+		labelPlayer -> setText("Player 2's Name:");
+	}
+	else if(index==1)
+	{
+		labelPlayer -> setText("Player 3's Name:");
+	}
+	else if(index==2)
+	{
+		labelPlayer -> setText("Player 4's Name:");
+	}
+
+	stringName[index] = lineName->text();
+
+//	cout << "Player " << index+1 << "'s Name: ";
+//	hold_name = stringName[index].toStdString();
+//	cout << hold_name << endl;
+
+	index++;
+	
+	lineName->clear();
+	if(index==num_players||index==4)
+	{
+		Pick_Class();
+		buttonOkay -> move (0,400);
+		lineName -> move (0,400);
+		labelPlayer -> move (0,400);
+	}
+}
+
+void Game::Pick_Class()
+{
+	//This is a function that will be called over and over.
+
+	lineName -> setDisabled(true);
+	counter_Pick_Class++; //Tests how many times this function is called
+	if(counter_Pick_Class==num_players)
+	{
+		for(int i=0;i<10;i++)
+		{
+			buttonClass[i]->move(0,1000);
+			labelDisplay -> setPixmap(*pixmapBoard);
+			buttonDice -> setText("Roll Dice");
+			buttonDice -> move(300,5);
+			buttonLegendOpen -> show();
+			labelText -> setText("Game Start!");
+			Begin_Game();
+		}
+	}
+	//Sets up the menu for players to choose their characters
+	else if(counter_Pick_Class==0)
+	{
+		labelDisplay -> setPixmap(*pixmapEmpty);
+		labelText -> setText ("Select your Character (P1)");
+
+		//Row 1
+		buttonClass[0]->setIcon(QPixmap("gfx/00.png"));
+		buttonClass[0]->setGeometry(384,150,32,32);
+		buttonClass[0]->show();
+	
+		//Row 2
+		buttonClass[1]->setIcon(QPixmap("gfx/01.png"));
+		buttonClass[1]->setGeometry(352,225,32,32);
+		buttonClass[1]->show();
+
+		buttonClass[2]->setIcon(QPixmap("gfx/02.png"));
+		buttonClass[2]->setGeometry(416,225,32,32);
+		buttonClass[2]->show();
+
+		//Row 3
+		buttonClass[3]->setIcon(QPixmap("gfx/03.png"));
+		buttonClass[3]->setGeometry(320,300,32,32);
+		buttonClass[3]->show();
+
+		buttonClass[4]->setIcon(QPixmap("gfx/04.png"));
+		buttonClass[4]->setGeometry(384,300,32,32);
+		buttonClass[4]->show();
+
+		buttonClass[5]->setIcon(QPixmap("gfx/05.png"));
+		buttonClass[5]->setGeometry(448,300,32,32);
+		buttonClass[5]->show();
+
+		//Row 4
+		buttonClass[6]->setIcon(QPixmap("gfx/06.png"));
+		buttonClass[6]->setGeometry(288,375,32,32);
+		buttonClass[6]->show();
+
+		buttonClass[7]->setIcon(QPixmap("gfx/07.png"));
+		buttonClass[7]->setGeometry(352,375,32,32);
+		buttonClass[7]->show();
+
+		buttonClass[8]->setIcon(QPixmap("gfx/08.png"));
+		buttonClass[8]->setGeometry(416,375,32,32);
+		buttonClass[8]->show();
+
+		buttonClass[9]->setIcon(QPixmap("gfx/09.png"));
+		buttonClass[9]->setGeometry(480,375,32,32);
+		buttonClass[9]->show();
+
+	}
+	else if(counter_Pick_Class==1)
+	{
+		labelText -> setText ("Select your Character (P2)");
+	}
+	else if(counter_Pick_Class==2)
+	{
+		labelText -> setText ("Select your Character (P3)");
+	}
+	else if(counter_Pick_Class==3)
+	{
+		labelText -> setText ("Select your Character (P4)");
+	}
+
+}
+
+void Game::Check_Class_Button(int i)
+{
+	//Applying player characters
+	buttonClass[i]->setEnabled(false);
+	hold_name = stringName[counter_Pick_Class].toStdString();
+	player[counter_Pick_Class].label(hold_name,i);
+	if(i==0)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/00.png");
+	}
+	else if(i==1)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/01.png");
+	}
+	else if(i==2)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/02.png");
+	}
+	else if(i==3)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/03.png");
+	}
+	else if(i==4)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/04.png");
+	}
+	else if(i==5)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/05.png");
+	}
+	else if(i==6)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/06.png");
+	}
+	else if(i==7)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/07.png");
+	}
+	else if(i==8)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/08.png");
+	}
+	else if(i==9)
+	{
+		pixmapPlayerIcon[counter_Pick_Class]->load("gfx/09.png");
+	}
+
+	labelPlayerIcon[counter_Pick_Class] -> setPixmap(*pixmapPlayerIcon[counter_Pick_Class]);
+	labelPlayerIcon[counter_Pick_Class] -> setFixedSize(pixmapPlayerIcon[counter_Pick_Class]->size());
+	labelPlayerIcon[counter_Pick_Class] -> move(311+(counter_Pick_Class*48),508);
+	labelPlayerCharacter[counter_Pick_Class] -> setPixmap(*pixmapPlayerIcon[counter_Pick_Class]);
+	labelPlayerCharacter[counter_Pick_Class] -> setFixedSize(pixmapPlayerIcon[counter_Pick_Class]->size());
+	labelPlayerCharacter[counter_Pick_Class] -> move(0,1000);
+}
+
+void Game::Begin_Game()
+{
+	//cout << card_value << endl;
+	//For updating the board
+	board.Draw_Player_Position(player,labelPlayerIcon, num_players);
+	board.Update_Status(labelPlayerNumber, labelPlayerName, labelPlayerCharacter, labelPlayerPosition, labelPositionDisplay, labelPlayerCurrency,  labelCurrencyDisplay, num_players, player, stringName, player_active);	
+	buttonDice -> show();
+
+	//To display whos turn it is
+	if(turn_num==0)
+	{
+		labelTurn -> move(48,144);
+		labelTurn -> show();
+	}
+	else if(turn_num==1)
+	{
+		labelTurn -> move(576,144);
+		labelTurn -> show();
+		buttonPlayerQuit->move(530,8);
+	}
+	else if(turn_num==2)
+	{
+		labelTurn -> move(48,512);
+		labelTurn -> show();
+	}
+	else if(turn_num==3)
+	{
+		labelTurn -> move(576,512);
+		labelTurn -> show();
+	}
+
+	Victory_Check();
+}
+
+/*void Game::Draw_Player_Position()
+{
+	//An algorithm that takes a player's position from 0-39 and outputs the character icon of the player at the appropriate spot on the board
+	for(int u=0;u<num_players;u++)
+	{
+		if(u==1|u==3)
+		{
+			p_x=24;
+		}
+		else
+		{
+			p_x=0;
+		}
+		if(u==2||u==3)
+		{
+			p_y=24;
+		}
+		else
+		{
+			p_y=0;
+		}
+
+		if(player[u].currentposition()>=0&&player[u].currentposition()<=4)
+		{
+			labelPlayerIcon[u]->move(284+(48*player[u].currentposition())+p_x,448+p_y);
+		}
+		else if(player[u].currentposition()>=5&&player[u].currentposition()<=9)
+		{
+			labelPlayerIcon[u]->move(476-(48*(player[u].currentposition()-5))+p_x,400+p_y);
+		}
+		else if(player[u].currentposition()>=10&&player[u].currentposition()<=14)
+		{
+			labelPlayerIcon[u]->move(284+(48*(player[u].currentposition()-10))+p_x,352+p_y);
+		}
+		else if(player[u].currentposition()>=15&&player[u].currentposition()<=19)
+		{
+			labelPlayerIcon[u]->move(476-(48*(player[u].currentposition()-15))+p_x,304+p_y);
+		}
+		else if(player[u].currentposition()>=20&&player[u].currentposition()<=24)
+		{
+			labelPlayerIcon[u]->move(284+(48*(player[u].currentposition()-20))+p_x,256+p_y);
+		}
+		else if(player[u].currentposition()>=25&&player[u].currentposition()<=29)
+		{
+			labelPlayerIcon[u]->move(476-(48*(player[u].currentposition()-25))+p_x,208+p_y);
+		}
+		else if(player[u].currentposition()>=30&&player[u].currentposition()<=34)
+		{
+			labelPlayerIcon[u]->move(284+(48*(player[u].currentposition()-30))+p_x,160+p_y);
+		}
+		else if(player[u].currentposition()>=35&&player[u].currentposition()<=39)
+		{
+			labelPlayerIcon[u]->move(476-(48*(player[u].currentposition()-35))+p_x,112+p_y);
+		}
+		
+
+	}
+}
+
+void Game::Update_Status()
+{
+	//To display the player's information at their correct location
+	int x_change, y_change; //Used to simplify the x y coordinates of each player's information
+	for(int l=0;l<num_players;l++)
+	{
+		if(l==0)
+		{
+			labelPlayerNumber[l] -> setText("Player 1");
+			x_change=0;
+			y_change=0;
+		}
+		else if(l==1)
+		{
+			labelPlayerNumber[l] -> setText("Player 2");
+			x_change=528;
+			y_change=0;
+		}
+		else if(l==2)
+		{
+			labelPlayerNumber[l] -> setText("Player 3");
+			x_change=0;
+			y_change=368;
+		}
+		else if(l==3)
+		{
+			labelPlayerNumber[l] -> setText("Player 4");
+			x_change=528;
+			y_change=368;
+		}
+
+		labelPlayerNumber[l] -> move(52+x_change,48+y_change);
+		labelPlayerNumber[l] -> show();
+	
+		labelPlayerName[l] -> setText(stringName[l]);
+		labelPlayerName[l] -> move(72+x_change,72+y_change);
+		labelPlayerName[l] -> show(); 
+		
+		labelPlayerCharacter[l] -> move(52+x_change,78+y_change);
+	
+		labelPositionDisplay[l] -> setText("Position:");
+		labelPositionDisplay[l] -> move(52+x_change,96+y_change);
+		labelPositionDisplay[l] -> show();
+	
+		labelPlayerPosition[l] -> setNum(player[l].currentposition()+1);
+		labelPlayerPosition[l] -> move(128+x_change,96+y_change);
+		labelPlayerPosition[l] -> show();	
+	
+		labelCurrencyDisplay[l] -> setText("Currency:");
+		labelCurrencyDisplay[l] -> move(52+x_change,114+y_change);
+		labelCurrencyDisplay[l] -> show();
+	
+		labelPlayerCurrency[l] -> setNum(player[l].currentcurrency());
+		labelPlayerCurrency[l] -> move(128+x_change,114+y_change);
+		labelPlayerCurrency[l] -> show();
+
+		if(!player_active[l])
+		{
+			labelPlayerNumber[l] -> setText("");
+			labelPlayerNumber[l] -> hide();
+			labelPositionDisplay[l] -> hide();
+			labelPositionDisplay[l] -> hide();
+			labelPlayerPosition[l] -> hide();	
+			labelCurrencyDisplay[l] -> hide();
+			labelPlayerCurrency[l] -> hide();
+		}
+	}
+}*/
+
+void Game::Dice_Roll()
+{
+	//Dice roll
+	srand(time(NULL));
+	dice_value=rand() % 6 + 1;
+	//cout << "Player " << turn_num+1;
+	//cout << " rolled a: " << dice_value << endl;
+
+	//Checks if +1 or -1 event is on
+	if(event_index==1)
+	{
+		dice_change=1;
+	}
+	else if(event_index==2)
+	{
+		dice_change=-1;
+	}
+	else
+	{
+		dice_change=0;
+	}
+
+	//Draws the Dice GUI
+	if(dice_value==1)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_01.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+	else if(dice_value==2)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_02.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+	else if(dice_value==3)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_03.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+	else if(dice_value==4)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_04.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+	else if(dice_value==5)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_05.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+	else if(dice_value==6)
+	{
+		labelDice -> setPixmap(QPixmap("gfx/dice_06.png"));
+		labelDice -> move(384,48);
+		labelDice -> show();
+	}
+
+	//If the player exceeds spot 40, pushes him back
+	if(player[turn_num].currentposition()+dice_value+dice_change>=40)
+	{
+		dice_value=(player[turn_num].currentposition()+dice_value+dice_change)-39;
+		player[turn_num].setposition(39-dice_value+dice_change);				
+	}
+	else
+	{
+		player[turn_num].addposition(dice_value+dice_change);
+	}
+
+	//Update the board again
+	board.Draw_Player_Position(player,labelPlayerIcon, num_players);
+	board.Update_Status(labelPlayerNumber, labelPlayerName, labelPlayerCharacter, labelPlayerPosition, labelPositionDisplay, labelPlayerCurrency,  labelCurrencyDisplay, num_players, player, stringName, player_active);
+
+	//Checks to see if the player landed on a special tile
+	if(turn_num==0)
+	{
+		//cout << "PLAYER ONE\n";
+		space.checkspace(player[0].currentposition(),player[0],player[1],player[2],player[3],event_index,dice_change,labelPlayerIcon[0],labelText,animate,labelEvent,buttonYes,buttonNo,buttonDice,labelShop,labelDice,card_value,turn_num);
+	}
+	else if(turn_num==1)
+	{
+		//cout << "PLAYER TWO\n";
+		space.checkspace(player[1].currentposition(),player[1],player[2],player[3],player[0],event_index,dice_change,labelPlayerIcon[1],labelText,animate,labelEvent,buttonYes,buttonNo,buttonDice,labelShop,labelDice,card_value,turn_num);
+	}
+	else if(turn_num==2)
+	{
+		//cout << "PLAYER THREE\n";
+		space.checkspace(player[2].currentposition(),player[2],player[3],player[0],player[1],event_index,dice_change,labelPlayerIcon[2],labelText,animate,labelEvent,buttonYes,buttonNo,buttonDice,labelShop,labelDice,card_value,turn_num);
+	}
+	else if(turn_num==3)
+	{
+		//cout << "PLAYER FOUR\n";
+		space.checkspace(player[3].currentposition(),player[3],player[0],player[1],player[2],event_index,dice_change,labelPlayerIcon[3],labelText,animate,labelEvent,buttonYes,buttonNo,buttonDice,labelShop,labelDice,card_value,turn_num);
+	}
+
+	if(turn_num==num_players-1)
+	{
+		turn_num=0;
+	}
+	else
+	{
+		turn_num++;
+	}
+
+	//All of this is a hard-code of checking players that have chose to forfeit the game. 
+	Check_Player_Turn();
+
+	//If there is one player left, end game with the last player as the victor
+	if(turn_num==3&&player_active[3]==false)
+	{
+		labelText -> setText("No more players. Game Over");
+		buttonDice -> hide();
+	}	
+
+	Begin_Game();
+}
+
+void Game::Victory_Check()
+{
+	//Checks to see if any of the players are on the final tile
+	for(int i=0;i<num_players;i++)
+	{
+		if(player[i].currentposition()==39)
+		{
+			//cout << "Player " << i << " wins!\n";
+			labelText -> setText("GAME OVER");
+			labelPlayerVictory[i] -> move(354,516);
+			buttonDice -> hide();
+			buttonPlayerQuit -> hide();
+		}
+	}
+
+	//Checks to see if the player is the only one left in the game
+	counter_player=0;
+	for(int u=0;u<num_players;u++)
+	{
+		if(player_active[u])
+		{
+			counter_player++;
+			counter_turn = u;
+		}
+	}
+	if(counter_player==1)
+	{
+		//cout << "Player " << counter_turn << " wins!\n";
+		labelText -> setText("GAME OVER");
+		labelPlayerVictory[counter_turn] -> move(354,516);
+		buttonDice -> hide();
+		buttonPlayerQuit -> hide();
+	}
+}
+
+void Game::Player_Quit()
+{
+	//Exits the player who chooses to forfeit
+	player_active[turn_num]=false;
+	Begin_Game();
+	if(turn_num==num_players-1)
+	{
+		turn_num=0;
+	}
+	else
+	{
+		turn_num++;
+	} 
+
+	//Hard-code check to see who would have the next turn
+	Check_Player_Turn();
+	labelText -> setText("A Player has left the game... Next Player's Turn");
+
+	if(turn_num==0)
+	{
+		labelTurn -> move(48,144);
+		labelTurn -> show();
+	}
+	else if(turn_num==1)
+	{
+		labelTurn -> move(576,144);
+		labelTurn -> show();
+		buttonPlayerQuit->move(530,8);
+	}
+	else if(turn_num==2)
+	{
+		labelTurn -> move(48,512);
+		labelTurn -> show();
+	}
+	else if(turn_num==3)
+	{
+		labelTurn -> move(576,512);
+		labelTurn -> show();
+	}
+}
+
+void Game::Yes()
+{
+	labelShop -> hide();
+	buttonYes -> hide();
+	buttonNo -> hide();
+	buttonDice -> move(300,5);
+	//Drawing the double roll card
+	if(card_value=='D') 
+	{
+		if(player[turn_num].currentcurrency()>=200)
+		{
+			player[turn_num].subcurrency(200);
+			space._bank.deposit(200);
+			Dice_Roll();
+		}
+		else
+		{
+			labelText -> setText("Not enough coins");
+			if(turn_num==num_players-1)
+			{	
+				turn_num=0;
+			}
+			else
+			{
+				turn_num++;
+			}
+			Check_Player_Turn();
+		}
+	}
+	//Drawing the pushback card
+	else if(card_value=='P') 
+	{
+		if(player[turn_num].currentcurrency()>=300)
+		{
+			labelText -> setText("All other players got pushed back!");
+			player[turn_num].subcurrency(300);
+			space._bank.deposit(300);
+			if(turn_num==0)
+			{
+				player[1].setposition(player[1].currentposition()/2);
+				player[2].setposition(player[2].currentposition()/2);
+				player[3].setposition(player[3].currentposition()/2);
+			}
+			if(turn_num==1)
+			{
+				player[0].setposition(player[0].currentposition()/2);
+				player[2].setposition(player[2].currentposition()/2);
+				player[3].setposition(player[3].currentposition()/2);
+			}
+			if(turn_num==2)
+			{
+				player[1].setposition(player[1].currentposition()/2);
+				player[0].setposition(player[0].currentposition()/2);
+				player[3].setposition(player[3].currentposition()/2);
+			}
+			if(turn_num==3)
+			{
+				player[1].setposition(player[1].currentposition()/2);
+				player[2].setposition(player[2].currentposition()/2);
+				player[0].setposition(player[0].currentposition()/2);
+			}
+		}
+		else
+		{
+			labelText -> setText("Not enough coins");
+		}		
+		if(turn_num==num_players-1)
+		{
+			turn_num=0;
+		}
+		else
+		{
+			turn_num++;
+		}
+		Check_Player_Turn();
+	}
+	//Drawing the money card
+	else if(card_value=='M')
+	{
+		if(player[turn_num].currentcurrency()>=500)
+		{
+			labelText -> setText("Players lost their money!");
+			player[turn_num].subcurrency(500);
+			space._bank.deposit(500);
+			if(turn_num==0)
+			{
+				space._bank.deposit(player[1].currentcurrency());
+				space._bank.deposit(player[2].currentcurrency());
+				space._bank.deposit(player[3].currentcurrency());
+				player[1].subcurrency(player[1].currentcurrency());
+				player[2].subcurrency(player[2].currentcurrency());
+				player[3].subcurrency(player[3].currentcurrency());
+			}
+			if(turn_num==1)
+			{
+				space._bank.deposit(player[0].currentcurrency());
+				space._bank.deposit(player[2].currentcurrency());
+				space._bank.deposit(player[3].currentcurrency());
+				player[0].subcurrency(player[0].currentcurrency());
+				player[2].subcurrency(player[2].currentcurrency());
+				player[3].subcurrency(player[3].currentcurrency());
+			}
+			if(turn_num==2)
+			{
+				space._bank.deposit(player[1].currentcurrency());
+				space._bank.deposit(player[0].currentcurrency());
+				space._bank.deposit(player[3].currentcurrency());
+				player[1].subcurrency(player[1].currentcurrency());
+				player[0].subcurrency(player[0].currentcurrency());
+				player[3].subcurrency(player[3].currentcurrency());
+			}
+			if(turn_num==3)
+			{
+				space._bank.deposit(player[1].currentcurrency());
+				space._bank.deposit(player[2].currentcurrency());
+				space._bank.deposit(player[0].currentcurrency());
+				player[1].subcurrency(player[1].currentcurrency());
+				player[2].subcurrency(player[2].currentcurrency());
+				player[0].subcurrency(player[0].currentcurrency());
+			}
+		}
+		else
+		{
+			labelText -> setText("Not enough coins");
+		}		
+		if(turn_num==num_players-1)
+		{
+			turn_num=0;
+		}
+		else
+		{
+			turn_num++;
+		}
+		Check_Player_Turn();
+	}
+	//Drawing the swap card
+	else 
+	{
+		if(player[turn_num].currentcurrency()>=300)
+		{
+			player[turn_num].subcurrency(300);
+			space._bank.deposit(300);
+			if(num_players==2)
+			{
+				labelText -> setText("Players have exchanged positions!");
+				hold_position = player[0].currentposition();
+				player[0].setposition(player[1].currentposition());
+				player[1].setposition(hold_position);
+			}
+			if(num_players==3)
+			{
+				labelText -> setText("Players have exchanged positions!");
+				hold_position = player[0].currentposition();
+				player[0].setposition(player[2].currentposition());
+				player[2].setposition(player[1].currentposition());
+				player[1].setposition(hold_position);
+			}
+			if(num_players==4)
+			{
+				labelText -> setText("Players have exchanged positions!");
+				hold_position = player[0].currentposition();
+				player[0].setposition(player[3].currentposition());
+				player[3].setposition(player[2].currentposition());
+				player[2].setposition(player[1].currentposition());
+				player[1].setposition(hold_position);
+			}
+		}
+		else
+		{
+			labelText -> setText("Not enough coins");
+		}		
+		if(turn_num==num_players-1)
+		{
+			turn_num=0;
+		}
+		else
+		{
+			turn_num++;
+		}
+			Check_Player_Turn();
+		}
+	Begin_Game();
+}
+void Game::No()
+{
+	labelShop -> hide();
+	buttonYes -> hide();
+	buttonNo -> hide();
+	buttonDice -> move(300,5);
+	labelText -> setText("Didn't buy...");
+	if(turn_num==num_players-1)
+	{
+		turn_num=0;
+	}
+	else
+	{
+		turn_num++;
+	}
+	Check_Player_Turn();
+	Begin_Game();
+}
+
+void Game::Check_Player_Turn()
+{
+	if(turn_num==0&&player_active[0]==false)
+	{
+		turn_num=1;
+	}
+	if(turn_num==1&&player_active[1]==false)
+	{
+		turn_num=2;
+	}
+	if(turn_num==2&&player_active[2]==false)
+	{
+		turn_num=3;
+	}
+	if(turn_num==3&&player_active[3]==false)
+	{
+		turn_num=0;
+	}
+	if(turn_num==0&&player_active[0]==false)
+	{
+		turn_num=1;
+	}
+	if(turn_num==1&&player_active[1]==false)
+	{
+		turn_num=2;
+	}
+	if(turn_num==2&&player_active[2]==false)
+	{
+		turn_num=3;
+	}
+
+	if(turn_num==3&&player_active[3]==false)
+	{
+		labelText -> setText("No more players. Game Over");
+		buttonDice -> hide();
+	}	
+}

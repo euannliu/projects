@@ -1,0 +1,127 @@
+#ifndef GAME_H
+#define GAME_H
+
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <QApplication>
+#include <QPushButton>
+#include <QWidget>
+#include <QMainWindow>
+#include <QFont>
+#include <QtGui>
+#include <QPalette>
+#include <QObject>
+
+#include "board.h"
+#include "card.h"
+#include "player.h"
+#include "bank.h"
+#include "space.h"
+
+using namespace std;
+
+class Game : public QMainWindow
+{
+
+	Q_OBJECT
+
+	private:
+	QPixmap *pixmapTitle;
+	QPixmap *pixmapEmpty;
+	QPixmap *pixmapBoard;
+	QPixmap *pixmapPlayerIcon[4];
+
+	QLabel *labelLegend;
+	QLabel *labelDisplay;
+	QLabel *labelText;
+	QLabel *labelPlayer;
+	QLabel *labelDice;
+	QLabel *labelEvent;
+	QLabel *labelShop;
+	QLabel *labelTurn;
+	QLabel *labelPlayerIcon[4];
+	QLabel *labelPlayerNumber[4];
+	QLabel *labelPlayerCurrency[4];
+	QLabel *labelPlayerPosition[4];
+	QLabel *labelPlayerCharacter[4];
+	QLabel *labelPlayerName[4];
+	QLabel *labelPlayerVictory[4];
+	QLabel *labelCurrencyDisplay[4];
+	QLabel *labelPositionDisplay[4];
+
+	QWidget *widgetTaskbar;
+	QWidget *widgetTextbar;
+
+	QPropertyAnimation *animate;
+
+	QPalette *paletteBlack;
+
+	QPushButton *buttonQuit;
+	QPushButton *buttonStart;
+	QPushButton *buttonTwo;
+	QPushButton *buttonThree;
+	QPushButton *buttonFour;
+	QPushButton *buttonOkay;
+	QPushButton *buttonClass[10];
+	QPushButton *buttonDice;
+	QPushButton *buttonLegendOpen;
+	QPushButton *buttonLegendClose;
+	QPushButton *buttonPlayerQuit;
+	QPushButton *buttonYes;
+	QPushButton *buttonNo;
+
+	QSignalMapper *mapperSignal;
+
+	QLineEdit *lineName;
+
+	QString stringName[4];
+
+
+	Player player[4];
+	bool player_active[4];
+	Space space;
+	Board board;
+	char card_value;
+	int dice_value;
+	int dice_change;
+	int num_players;
+	int index;
+	int event_index;
+	int turn_num;
+	int hold_class;
+	int p_x;
+	int p_y;
+	int hold_position;
+	int counter_player;
+	int counter_turn;
+	int counter_Pick_Class; //To check how many times Pick_Class is being called
+	string hold_name;
+
+	private slots:
+	void Display_Number_Players();
+	void Set_Names_Two();
+	void Set_Names_Three();
+	void Set_Names_Four();
+	void Name_Input();
+	void Set_Name();
+	void Pick_Class();
+	void Begin_Game();
+	void Dice_Roll();
+	void Victory_Check();
+	void Player_Quit();
+	void Check_Player_Turn();
+
+	void Yes();
+	void No();
+
+	public slots:
+	void Check_Class_Button(int i);
+
+	public:
+	Game();
+
+};
+
+#endif
+
