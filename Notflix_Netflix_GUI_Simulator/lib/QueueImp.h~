@@ -1,0 +1,68 @@
+#include "Queue.h"
+
+template <class T>
+Queue<T>::Queue()
+{
+	head = NULL; //head will represent BACK
+	tail = NULL; //tail will represent FRONT
+}
+
+template <class T>
+void Queue<T>::enqueue (const T & item)
+{
+	Title<T> *temp;
+	temp = new Title<T>;
+	temp->name = item;
+	temp->next = head;
+	temp->prev = NULL;
+
+	if(temp->next!=NULL)
+	{
+		head->prev = temp;
+	}
+	if(head==NULL)
+	{
+		tail = temp;
+	}
+	
+	head = temp;
+}
+
+template <class T>
+void Queue<T>::dequeue ()
+{
+	if(tail==NULL)
+		throw EmptyQueueException();
+	else
+	{
+		Title<T> *temp;
+		temp = tail;
+		if(tail->prev==NULL)
+		{
+			tail = NULL;
+			head = NULL;
+		}
+		else
+			tail = tail->prev;
+
+		delete temp;
+	}
+}
+
+template <class T>
+const T & Queue<T>::peekfront()
+{
+	if(tail==NULL)
+		throw EmptyQueueException();
+	else
+		return tail->name;
+}
+
+template <class T>
+bool Queue<T>::isEmpty()
+{
+	if(tail==NULL)
+		return true;
+	else
+		return false;
+}
