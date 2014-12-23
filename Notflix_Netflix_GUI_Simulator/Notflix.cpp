@@ -41,8 +41,157 @@ Notflix::Notflix(int argc, char* argv[])
 
 Notflix::~Notflix()
 {
+	if(moviebank!=NULL)
 	delete moviebank;
+	
+	if(userbank!=NULL)
 	delete userbank;
+	
+	/*
+	if(pixmapLogo!=NULL)
+	delete pixmapLogo;
+	
+	if(labelPicture!=NULL)
+	delete labelPicture;
+	
+	if(errorEmptyFields!=NULL)
+	delete errorEmptyFields;
+	
+	if(pixmapSide!=NULL)
+	delete pixmapSide;
+	
+	if(labelSide!=NULL)
+	delete labelSide;
+	
+	if(widgetTitlebar!=NULL)
+	delete widgetTitlebar;
+	
+	if(labelText1!=NULL)
+	delete labelText1;
+	
+	if(inputLogin!=NULL)
+	delete inputLogin;
+	
+	if(buttonLogin!=NULL)
+	delete buttonLogin;
+
+	if(buttonNewUser!=NULL)
+	delete buttonNewUser;
+	
+	if(buttonQuit!=NULL)
+	delete buttonQuit;
+	
+	if(inputNewID!=NULL)
+	delete inputNewID;
+
+	if(inputNewName!=NULL)
+	delete inputNewName;
+	
+	if(labelText2!=NULL)
+	delete labelText2;
+	
+	if(messageNotice!=NULL)
+	delete messageNotice;
+	
+	if(widgetMainMenu!=NULL)
+	delete widgetMainMenu;
+	
+	if(labelMainText1!=NULL)
+	delete labelMainText1;
+	
+	if(labelMainText2!=NULL)
+	delete labelMainText2;
+	
+	if(labelMainText3!=NULL)
+	delete labelMainText3;
+	
+	if(labelMainText4!=NULL)
+	delete labelMainText4;
+	
+	if(labelMainText5!=NULL)
+	delete labelMainText5;
+	
+	if(buttonReturn!=NULL)
+	delete buttonReturn;
+	
+	if(buttonRent!=NULL)
+	delete buttonRent;
+	
+	if(buttonNext!=NULL)
+	delete buttonNext;
+	
+	if(buttonRemove!=NULL)
+	delete buttonRemove;
+	
+	if(buttonMovie!=NULL)
+	delete buttonMovie;
+	
+	if(buttonKeyword!=NULL)
+	delete buttonKeyword;
+	
+	if(buttonLogout!=NULL)
+	delete buttonLogout;
+	
+	if(inputSearch!=NULL)
+	delete inputSearch;
+	
+	if(pixmapBack!=NULL)
+	delete pixmapBack;
+	
+	if(windowMovie!=NULL)
+	delete windowMovie;
+	
+	if(labelBack!=NULL)
+	delete labelBack;
+	
+	if(buttonMQueue!=NULL)
+	delete buttonMQueue;
+	
+	if(buttonMExit!=NULL)
+	delete buttonMExit;
+	
+	if(buttonKNext!=NULL)
+	delete buttonKNext;
+	
+	if(buttonKQueue!=NULL)
+	delete buttonKQueue;
+	
+	if(buttonKExit!=NULL)
+	delete buttonKExit;
+	
+	if(scrollArea!=NULL)
+	delete scrollArea;
+	
+	if(widgetArea!=NULL)
+	delete widgetArea;
+	
+	if(widgetRate!=NULL)
+	delete widgetRate;
+	
+	if(labelRate!=NULL)
+	delete labelRate;
+	
+	if(buttonReRateY!=NULL)
+	delete buttonReRateY;
+	
+	if(buttonReRateN!=NULL)
+	delete buttonReRateN;
+	
+	if(buttonRatingY!=NULL)
+	delete buttonRatingY;
+	
+	if(buttonRatingN!=NULL)
+	delete buttonRatingN;
+	
+	if(buttonRateDY!=NULL)
+	delete buttonRateDY;
+	
+	if(buttonRateDN!=NULL)
+	delete buttonRateDN;
+	
+	if(sliderRate!=NULL)
+	delete sliderRate;
+	*/
 }
 
 void Notflix::Read_Data(int argc, char* argv[])
@@ -79,7 +228,6 @@ void Notflix::Read_Data(int argc, char* argv[])
 			ss >> file_movie;
 			ss.clear();
 			file.close();
-		
 			//Movie file input
 			file.open(&file_movie[0]);
 			if(file.fail())
@@ -105,7 +253,6 @@ void Notflix::Read_Data(int argc, char* argv[])
 				Read_User_Data();
 			}
 			file.close();
-			
 			//Go to the main menu
 			if(!crash)
 				Initialize();
@@ -116,9 +263,9 @@ void Notflix::Read_Data(int argc, char* argv[])
 
 void Notflix::Read_Movie_Data()
 {
-	begin = false;
 	while(getline(file,line))
 	{
+		begin = false;
 		ss << line;
 		ss >> input_one;
 		if(input_one=="BEGIN")
@@ -160,16 +307,19 @@ void Notflix::Read_Movie_Data()
 			if(crash)
 				break;
 		}
-		moviebank->add(movie);
+		if(begin)
+			moviebank->add(movie);
 	}
 }
 
 void Notflix::Read_User_Data()
 {
+	Map<string,int> *temp_ratings;
 	begin = false;
 	read_movie = NULL;
 	while(getline(file,line))
 	{
+		temp_ratings = new Map<string,int>;
 		ss << line;
 		ss >> input_one;
 		if(input_one=="BEGIN")
@@ -220,6 +370,24 @@ void Notflix::Read_User_Data()
 								}
 							}
 						}
+					}
+					else if(input_one == "RATINGS")
+					{
+						int rating_num;
+						ss.clear();
+						while(getline(file,line))
+						{
+							if(line=="END RATINGS" || line == "END")
+							{
+								break;
+							}
+							ss << line;
+							ss >> rating_num;
+							getline(ss,line);
+							line.erase(0,1);
+							temp_ratings->add(line,rating_num);
+							ss.clear();
+						}
 					}	
 				}
 				else if(input_one=="END")
@@ -263,6 +431,7 @@ void Notflix::Read_User_Data()
 			}
 		}
 		user = new User(user_id,user_name);
+		user->ratingbank = *temp_ratings;
 		user->rentMovie(read_movie);
 		read_movie = NULL;
 		while(!q_movies.isEmpty())
@@ -271,6 +440,7 @@ void Notflix::Read_User_Data()
 			q_movies.dequeue();
 		}
 		userbank->add(user);
+		delete temp_ratings;
 	}
 }
 
@@ -469,6 +639,53 @@ void Notflix::Initialize()
 	widgetArea -> hide();
 	
 	windowKeyword = NULL;
+	
+	widgetRate = new QWidget(this);
+	widgetRate->setStyleSheet("background-color:white;");
+	widgetRate -> resize(256,128);
+	widgetRate -> move(112,96);
+	widgetRate -> hide();
+	
+	labelRate = new QLabel(widgetRate);
+	labelRate -> setGeometry(8,16,240,16);
+	labelRate -> setAlignment(Qt::AlignCenter);
+	labelRate -> hide();
+	
+	buttonReRateY = new QPushButton("Yes",widgetRate);
+	buttonReRateY -> setGeometry(21,80,96,24);
+	connect(buttonReRateY, SIGNAL(clicked()), this, SLOT(Rate_Movie()));
+	buttonReRateY -> hide();
+	
+	buttonReRateN = new QPushButton("No",widgetRate);
+	buttonReRateN -> setGeometry(128,80,96,24);
+	connect(buttonReRateN, SIGNAL(clicked()), this, SLOT(Rate_Delete_Menu()));
+	buttonReRateN -> hide();
+	
+	buttonRatingY = new QPushButton("Rate",widgetRate);
+	buttonRatingY -> setGeometry(21,80,96,24);
+	connect(buttonRatingY, SIGNAL(clicked()), this, SLOT(Rating_Update()));
+	buttonRatingY -> hide();
+	
+	buttonRatingN = new QPushButton("No Thanks",widgetRate);
+	buttonRatingN -> setGeometry(128,80,96,24);
+	connect(buttonRatingN, SIGNAL(clicked()), this, SLOT(Return_Movie_Final()));
+	buttonRatingN -> hide();
+	
+	buttonRateDY = new QPushButton("Yes",widgetRate);
+	buttonRateDY -> setGeometry(21,80,96,24);
+	connect(buttonRateDY, SIGNAL(clicked()), this, SLOT(Rate_Delete()));
+	buttonRateDY -> hide();
+	
+	buttonRateDN = new QPushButton("No",widgetRate);
+	buttonRateDN -> setGeometry(128,80,96,24);
+	connect(buttonRateDN, SIGNAL(clicked()), this, SLOT(Return_Movie_Final()));
+	buttonRateDN -> hide();
+	
+	sliderRate = new QSlider( Qt::Horizontal,widgetRate);
+	sliderRate -> setGeometry(80,50,96,24);
+	sliderRate -> setTickInterval(1);
+	sliderRate -> setRange(0,4);
+	sliderRate -> hide();
 }
 
 void Notflix::Register()
@@ -683,9 +900,12 @@ void Notflix::M_Queue()
 	combine = movie->getTitle() + " has been added to your Queue";
 	messageNotice -> setText(QString(combine.c_str()));
 	messageNotice -> exec();
-	user->usermoviebank.enqueue(movie);
 	combine = "<font color='white'>Top: " + movie->getTitle() + "</font>";
-	labelMainText4 -> setText(QString(combine.c_str()));
+	
+	if(user->usermoviebank.isEmpty())
+		labelMainText4 -> setText(QString(combine.c_str()));
+		
+	user->usermoviebank.enqueue(movie);
 	M_Exit();
 }
 
@@ -719,7 +939,6 @@ void Notflix::Search_Keyword()
 	//Counting
 	keyword_match_count=0;	
 	hold_movie = new Movie* [moviebank->size()];
-			
 	for(int i=0;i<moviebank->size();i++)
 	{
 		hold_movie[i] = *mb_iterator;
@@ -774,100 +993,105 @@ void Notflix::Search_Keyword()
 		mb_iterator = moviebank->begin();
 		hold_count=0;
 		
-		counter_check = true;
+		//counter_check = true;
 		counter_one = 0;
 		counter_two = 0;
+		
 		K_Menu();
 
 	}
 }
 
 void Notflix::K_Menu()
-{	
+{
+	bool exit = false;
+	bool buttonhiding = false;
 	string combine;
 	ifstream test_pic_file;
-	if(counter_two == moviebank->size())
+	if(counter_two == keyword_match_count-1)
 	{
-		K_Exit();
+		buttonKNext->hide();
+		buttonhiding = true;
 	}
-	movie_check=false;
-	Search_Movie();
-	if(movie_check)
+	if(!exit)
 	{
-		combine = "<font color='white'>" + movie->getTitle() + "</font>";
-		labelMovieTitle = new QLabel(windowMovie);
-		labelMovieTitle -> setAlignment(Qt::AlignCenter);
-		labelMovieTitle -> setGeometry(0,8,258,24);
-		labelMovieTitle -> setText(QString(combine.c_str()));
-		labelMovieTitle -> show();
-		
-		combine = "img/Logo/" + movie->getTitle() + " Logo.png";
-		test_pic_file.open(&combine[0]);
-		if(test_pic_file.fail())
+		movie_check=false;
+		Search_Movie();
+		if(movie_check)
 		{
-			pixmapMovie = new QPixmap("img/Logo/DefaultLogo.png");
-			pixmapMovie -> scaled(208,72);
+			combine = "<font color='white'>" + movie->getTitle() + "</font>";
+			labelMovieTitle = new QLabel(windowMovie);
+			labelMovieTitle -> setAlignment(Qt::AlignCenter);
+			labelMovieTitle -> setGeometry(0,8,258,24);
+			labelMovieTitle -> setText(QString(combine.c_str()));
+			labelMovieTitle -> show();
+		
+			combine = "img/Logo/" + movie->getTitle() + " Logo.png";
+			test_pic_file.open(&combine[0]);
+			if(test_pic_file.fail())
+			{
+				pixmapMovie = new QPixmap("img/Logo/DefaultLogo.png");
+				pixmapMovie -> scaled(208,72);
 			
-			labelMovie = new QLabel(windowMovie);
-			labelMovie -> setPixmap(*pixmapMovie);
-			labelMovie -> setFixedSize(pixmapMovie -> size());
-			labelMovie -> setGeometry(24,35,208,72);
-			labelMovie -> show();
-		}		
+				labelMovie = new QLabel(windowMovie);
+				labelMovie -> setPixmap(*pixmapMovie);
+				labelMovie -> setFixedSize(pixmapMovie -> size());
+				labelMovie -> setGeometry(24,35,208,72);
+				labelMovie -> show();
+			}		
+			else
+			{
+				pixmapMovie = new QPixmap(QString(combine.c_str()));
+				pixmapMovie -> scaled(208,72);
+			
+				labelMovie = new QLabel(windowMovie);
+				labelMovie -> setPixmap(*pixmapMovie);
+				labelMovie -> setFixedSize(pixmapMovie -> size());
+				labelMovie -> setGeometry(24,35,208,72);
+				labelMovie -> show();
+			}
+			test_pic_file.close();
+		
+			kb_iterator = movie->getAllKeywords().begin();
+			combine = "";
+			int window_size = 0;
+			for(int j=0;j<movie->getAllKeywords().size();j++)
+			{
+				window_size += 24;
+				combine = combine + *kb_iterator + "\n";
+				try
+				{
+					++kb_iterator;
+				}
+				catch(NoSuchElementException &e)
+				{
+					break;
+				}
+			}
+			labelKeywords = new QLabel(widgetArea);
+			labelKeywords -> setGeometry(0,0,240,window_size);
+			labelKeywords -> setText(QString(combine.c_str()));
+			labelKeywords -> setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+			labelKeywords -> show();
+			widgetArea -> setMinimumSize(240,window_size);
+			scrollArea -> setWidget(widgetArea);
+			scrollArea -> show();
+			/*
+			if(counter_check)
+			{
+				counter_check = false;
+				//counter_one=0;
+			}*/
+			if(counter_one<keyword_match_count && !buttonhiding) //checks to see if it is displaying the last result
+				buttonKNext -> show();
+			else
+				buttonKNext -> hide();
+		}
 		else
 		{
-			pixmapMovie = new QPixmap(QString(combine.c_str()));
-			pixmapMovie -> scaled(208,72);
-			
-			labelMovie = new QLabel(windowMovie);
-			labelMovie -> setPixmap(*pixmapMovie);
-			labelMovie -> setFixedSize(pixmapMovie -> size());
-			labelMovie -> setGeometry(24,35,208,72);
-			labelMovie -> show();
+			counter_one++;
+			K_Menu();
 		}
-		test_pic_file.close();
-		
-		kb_iterator = movie->getAllKeywords().begin();
-		combine = "";
-		int window_size = 0;
-		for(int j=0;j<movie->getAllKeywords().size();j++)
-		{
-			window_size += 24;
-			combine = combine + *kb_iterator + "\n";
-			try
-			{
-				++kb_iterator;
-			}
-			catch(NoSuchElementException &e)
-			{
-				break;
-			}
-		}
-		labelKeywords = new QLabel(widgetArea);
-		labelKeywords -> setGeometry(0,0,240,window_size);
-		labelKeywords -> setText(QString(combine.c_str()));
-		labelKeywords -> setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-		labelKeywords -> show();
-		cout << window_size << endl;
-		widgetArea -> setMinimumSize(240,window_size);
-		scrollArea -> setWidget(widgetArea);
-		scrollArea -> show();
-		
-		if(counter_check)
-		{
-			counter_check = false;
-			counter_one=0;
-		}
-		if((counter_one<keyword_match_count-1)) //checks to see if it is displaying the last result
-			buttonKNext -> show();
-		else
-			buttonKNext -> hide();
-	}
-	else
-	{
-		counter_one++;
-		counter_two++;
-		K_Menu();
 	}
 }
 
@@ -888,10 +1112,24 @@ void Notflix::K_Queue()
 	combine = movie->getTitle() + " has been added to your Queue";
 	messageNotice -> setText(QString(combine.c_str()));
 	messageNotice -> exec();
-	user->usermoviebank.enqueue(movie);
 	combine = "<font color='white'>Top: " + movie->getTitle() + "</font>";
-	labelMainText4 -> setText(QString(combine.c_str()));
-	K_Menu();
+	
+	if(user->usermoviebank.isEmpty())
+		labelMainText4 -> setText(QString(combine.c_str()));
+		
+	user->usermoviebank.enqueue(movie);
+			
+	delete labelMovieTitle;
+	delete labelKeywords;
+	delete pixmapMovie;
+	delete labelMovie;
+	
+	counter_one++;
+	counter_two++;
+	if(counter_two == keyword_match_count)
+		K_Exit();
+	else
+		K_Menu();
 }
 
 void Notflix::K_Destructor()
@@ -909,6 +1147,7 @@ void Notflix::K_Exit()
 	labelBack -> hide();
 	scrollArea -> hide();
 	widgetArea -> hide();
+	buttonKNext->hide();
 	buttonKQueue -> hide();
 	buttonKExit -> hide();
 	
@@ -1057,18 +1296,130 @@ void Notflix::Return_Movie()
 {
 	if(user->currentMovie()!=NULL)
 	{
-		string combine;
-		combine = user->currentMovie()->getTitle() + " has been returned!";
-		messageNotice -> setText(QString(combine.c_str()));
-		messageNotice -> exec();
-		user->returnMovie();
-		
-		//Update current movie
-		combine = "<font color='white'>You have no movies checked out...</font>";
-		labelMainText2 -> setText(QString(combine.c_str()));
+		bool rating_check = false;
+		Map<string,int>::Iterator temp_it;
+		temp_it = user->ratingbank.begin();
+		Pair<string, int> temp_pair;
+		while(true)
+		{
+			temp_pair = *temp_it;
+			if(temp_pair.first == user->currentMovie()->getTitle())
+			{
+				rating_check=true;
+				break;
+			}
+			else
+			{
+				try
+				{
+					++temp_it;
+				}
+				catch(NoSuchElementException &e)
+				{
+					break;
+				}
+			}
+		}
+		if(rating_check)
+			ReRate_Movie();
+		else
+			Rate_Movie();
 	}
 	else
 		errorEmptyFields -> showMessage("Error 005 - No movie to return");
+}
+
+void Notflix::Rate_Movie()
+{
+	bool rating_check = false;
+	Map<string,int>::Iterator temp_it;
+	temp_it = user->ratingbank.begin();
+	Pair<string, int> temp_pair;
+	while(true)
+	{
+		temp_pair = *temp_it;
+		if(temp_pair.first == user->currentMovie()->getTitle())
+		{
+			rating_check=true;
+			break;
+		}
+		else
+		{
+			try
+			{
+				++temp_it;
+			}
+			catch(NoSuchElementException &e)
+			{
+				break;
+			}
+		}
+	}
+	if(rating_check)
+		user->ratingbank.remove(user->currentMovie()->getTitle());
+		
+	buttonReRateY -> hide();
+	buttonReRateN -> hide();
+	
+	widgetRate->show();
+	labelRate->setText("Rate this movie!");
+	labelRate->show();
+	sliderRate -> show();
+	buttonRatingN -> show();
+	buttonRatingY -> show();
+}
+
+void Notflix::ReRate_Movie()
+{
+	widgetRate->show();
+	labelRate->setText("Re-rate this movie?");
+	labelRate->show();
+	
+	buttonReRateY -> show();
+	buttonReRateN -> show();
+}
+
+void Notflix::Rating_Update()
+{
+	user->ratingbank.add(user->currentMovie()->getTitle(),sliderRate->value()+1);
+	Return_Movie_Final();
+}
+
+void Notflix::Rate_Delete_Menu()
+{
+	labelRate->setText("Delete your rating?");
+	labelRate->show();
+	
+	buttonReRateY -> hide();
+	buttonReRateN -> hide();
+	buttonRateDY -> show();
+	buttonRateDN -> show();
+}
+
+void Notflix::Rate_Delete()
+{
+	user->ratingbank.remove(user->currentMovie()->getTitle());
+	Return_Movie_Final();
+}
+
+void Notflix::Return_Movie_Final()
+{
+	widgetRate->hide();
+	
+	sliderRate -> hide();
+	buttonRatingN -> hide();
+	buttonRatingY -> hide();
+	buttonRateDY -> hide();
+	buttonRateDN -> hide();
+	
+	string combine;
+	combine = user->currentMovie()->getTitle() + " has been returned!";
+	messageNotice -> setText(QString(combine.c_str()));
+	messageNotice -> exec();
+	user->returnMovie();
+	//Update current movie
+	combine = "<font color='white'>You have no movies checked out...</font>";
+	labelMainText2 -> setText(QString(combine.c_str()));
 }
 
 void Notflix::Queue_Rent()
@@ -1190,7 +1541,7 @@ void Notflix::Logout()
 					if(token=="END")
 					{
 						sstoken >> token;
-						if(token!="QUEUE")
+						if(token!="QUEUE" && token!= "RATINGS")
 						{
 							break;
 						}
@@ -1222,7 +1573,26 @@ void Notflix::Logout()
 		temp_Q.enqueue(user->usermoviebank.peekFront());
 		user->usermoviebank.dequeue();
 	}
+	
 	temp_file_o << "END QUEUE" << endl;
+	temp_file_o << "BEGIN RATINGS" << endl;
+	Map<string,int>::Iterator temp_it;
+	Pair<string,int> temp_pair;
+	temp_it = user->ratingbank.begin();
+	while(user->ratingbank.size()>0)
+	{
+		temp_pair = *temp_it;
+		temp_file_o << temp_pair.second << " " << temp_pair.first << endl;
+		try
+		{
+			++temp_it;
+		}
+		catch(NoSuchElementException &e)
+		{
+			break;
+		}
+	}
+	temp_file_o << "END RATINGS" << endl;
 	temp_file_o << "END" << endl;
 	while(!temp_Q.isEmpty())
 	{
@@ -1266,6 +1636,7 @@ void Notflix::Logout()
 
 void Notflix::closeEvent(QCloseEvent *event)
 {
+	event->spontaneous();
 	if(in_menu)
 	{
 		messageNotice -> setText("Changes will not be saved.");

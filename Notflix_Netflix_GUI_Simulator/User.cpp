@@ -12,10 +12,12 @@ User::User (const User & other)
 {
 	_name = other.getName();
 	_id = other.getID();
+	rentedmovie = NULL; 
 }
 
 User::~User()
 {
+	delete rentedmovie;
 }
 
 string User::getID () const

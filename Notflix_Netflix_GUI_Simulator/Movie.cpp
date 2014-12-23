@@ -53,9 +53,7 @@ void Movie::addKeyword (string keyword)
 	string temp = keyword;
 	transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
 	if(!bank->contains(temp))
-	{
 		bank->add(keyword);
-	}
 }
 
 Set<string> & Movie::getAllKeywords () const

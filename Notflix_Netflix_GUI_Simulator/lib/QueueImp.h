@@ -8,6 +8,13 @@ Queue<T>::Queue()
 }
 
 template <class T>
+Queue<T>::~Queue()
+{
+	while(!isEmpty())
+		dequeue();
+}
+
+template <class T>
 void Queue<T>::enqueue (const T & item)
 {
 	Title<T> *temp;

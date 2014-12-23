@@ -22,6 +22,7 @@
 #include <QFrame>
 #include <QScrollArea>
 #include <QCloseEvent>
+#include <QSlider>
 
 #include "Movie.h"
 #include "User.h"
@@ -95,6 +96,16 @@ class Notflix : public QMainWindow
 		QWidget *widgetArea;
 		QScrollArea *scrollArea;
 		
+		QWidget *widgetRate;
+		QLabel *labelRate;
+		QSlider *sliderRate;
+		QPushButton *buttonRatingY;
+		QPushButton *buttonRatingN;
+		QPushButton *buttonReRateY;
+		QPushButton *buttonReRateN;
+		QPushButton *buttonRateDY;
+		QPushButton *buttonRateDN;
+		
 	private slots:
 		void Register();
 		void Reg_Back();
@@ -104,10 +115,17 @@ class Notflix : public QMainWindow
 		void Search_Keyword();
 		
 		void Return_Movie();
+		void Return_Movie_Final();
 		void Queue_Rent();
 		void Queue_Next();
 		void Queue_Remove();
 		void Logout();
+		
+		void Rate_Movie();
+		void ReRate_Movie();
+		void Rating_Update();
+		void Rate_Delete_Menu();
+		void Rate_Delete();
 		
 		void M_Queue();
 		void M_Exit();
@@ -134,6 +152,7 @@ class Notflix : public QMainWindow
 		Set<User*>::Iterator ub_iterator;
 		Set<string> *keywordbank;
 		Set<string>::Iterator kb_iterator;
+		Set<string> *ratingbank;
 		Queue<Movie*> q_movies;
 
 		ifstream file; //to contain and load a file

@@ -13,6 +13,8 @@ template <class T>
 class Queue {
   public:
     Queue();
+    
+    ~Queue();
 
     void enqueue (const T & item);
       /* adds the item to the end of the queue.

@@ -1,0 +1,29 @@
+BEGIN The Princess Bride
+KEYWORD: comedy
+KEYWORD: Inigo Montoya
+KEYWORD: Robin Wright
+END
+BEGIN City Lights
+KEYWORD: comedy
+KEYWORD: romance
+KEYWORD: Charlie Chaplin
+KEYWORD: social criticism
+END
+BEGIN Rosemary
+KEYWORD: romance
+KEYWORD: Tom Sawyer
+KEYWORD: comedy
+END
+BEGIN Top Gun
+KEYWORD: Tom Cruise
+KEYWORD: Badass
+KEYWORD: Action
+KEYWORD: Sexy
+KEYWORD: Manly
+KEYWORD: Best Movie
+END
+BEGIN Wargames
+KEYWORD: computer
+KEYWORD: comedy
+END
+

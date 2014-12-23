@@ -1,6 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 #include <iostream>
+#include "rbbst.h"
 using namespace std;
 
 
@@ -19,6 +20,7 @@ struct MapItem
   keyType key;
   valueType value;
   MapItem<keyType, valueType> *prev, *next;
+  
 };
 
 template <class FirstType, class SecondType> 
@@ -43,6 +45,8 @@ public:
 	void add (keyType key, valueType value); 
 	void remove (keyType key);
 	void merge (const Map<keyType, valueType> & other);
+	
+	bool search (keyType key);
 
 	Map& operator = (const Map &other);
 	
@@ -51,70 +55,90 @@ public:
         public:
         	Iterator()
         	{
-        		it_pos = NULL;
+        		iter.curr = NULL;
+        		temp_it = NULL;
+        	/*
+        		iter = new typename RedBlackTree<keyType, valueType>::iterator(NULL);
+        		temp_it = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
+        	*/
         	}
-        	Iterator(MapItem<keyType,valueType> *other)
+        	Iterator(typename RedBlackTree<keyType, valueType>::iterator other)
         	{
-        		it_pos = other;
+        		//temp_it = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
+        		//iter = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
+        		iter = other;
+        		temp_it = NULL;
         	}
-        		
+        	~Iterator()
+        	{
+        		//delete iter;
+        		//delete temp_it;
+        	}
           	Pair<keyType, valueType> operator* () const
           	{
+          		pair<keyType, valueType> std_pair;
           		Pair<keyType, valueType> temp_pair;
-          		temp_pair.first = it_pos->key;
-      			temp_pair.second = it_pos->value;
+          		
+          		if(iter!=temp_it)
+		  	{
+		  		std_pair = *iter;
+		  		
+		  		temp_pair.first = std_pair.first;
+	      			temp_pair.second = std_pair.second;
+	      		}
        			return temp_pair;
            	}
            	
           	Map<keyType,valueType>::Iterator operator++ ()
           	{
-          		if(it_pos->next==NULL)
+          		++iter;
+          		if(iter.curr == NULL)
           			throw NoSuchElementException();
-          		else
-          			it_pos = it_pos->next;
           			
           		return *this;
           	}
           	
-          	Map<keyType,valueType>::Iterator operator= (const Map<keyType,valueType>::Iterator & other)
+          	Map<keyType,valueType>::Iterator operator= (const typename RedBlackTree<keyType, valueType>::iterator & other)
           	{
-          		if(it_pos!=other.it_pos)
+          		if(RedBlackTree<keyType, valueType>::iter.curr!=other.curr)
           		{
-		  		it_pos = other.it_pos;
+		  		iter.curr = other.curr;
 		  	}
           		return *this; 
           	}
 
-         	bool operator== (const Map<keyType,valueType>::Iterator & other) const 
+         	bool operator== (const typename RedBlackTree<keyType, valueType>::iterator & other) const 
             	{
-            		if(it_pos==other.it_pos)
+            		if(iter.curr==other.curr)
             			return true;
             		else
             			return false;
             	}
             	
-            	bool operator!= (const Map<keyType,valueType>::Iterator & other) const
+            	bool operator!= (const typename RedBlackTree<keyType, valueType>::iterator & other) const
          	{
-            		if(it_pos==other.it_pos)
+            		if(iter.curr==other.curr)
             			return false;
             		else
             			return true;
             	}
             	
-              	MapItem<keyType,valueType> *it_pos;
-
+              	//MapItem<keyType,valueType> *it_pos;
+		typename RedBlackTree<keyType, valueType>::iterator iter;
+		typename RedBlackTree<keyType, valueType>::iterator temp_it;
 	};
 
 	Map<keyType,valueType>::Iterator begin () const
 	{
-		return Map<keyType,valueType>::Iterator(head);
+		return Map<keyType,valueType>::Iterator(bank->begin());
 	}
 	Map<keyType,valueType>::Iterator end () const
 	{
-		return Map<keyType,valueType>::Iterator(NULL);
+		return Map<keyType,valueType>::Iterator();
 	}
         
 private:
+	RedBlackTree<keyType, valueType> *bank;
 	MapItem <keyType, valueType> *head, *tail, *there;
 
 	int num; //How many items are currently in this linked list

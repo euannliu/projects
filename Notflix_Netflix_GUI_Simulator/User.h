@@ -3,6 +3,7 @@
 #include <string>
 #include "Movie.h"
 #include "lib/Queue.h"
+#include "lib/Map.h"
 
 using namespace std;
 class User {
@@ -40,7 +41,9 @@ class User {
       /* returns the user's current checked out movie.
          Returns NULL if the user has no movie checked out. */
          
+    
   	Queue<Movie*> usermoviebank;
+  	Map<string,int> ratingbank;
   private:
   	string _name;
   	string _id;

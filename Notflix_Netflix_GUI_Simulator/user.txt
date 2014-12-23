@@ -1,0 +1,84 @@
+BEGIN dkempe
+NAME: David Kempe
+END
+BEGIN madhatter
+NAME: The Mad Hatter
+END
+BEGIN james
+NAME: jamey james
+END
+BEGIN astridc
+NAME: Astrid Collins
+MOVIE: 
+END
+BEGIN aaroncot
+NAME: Aaron Cote
+MOVIE: City Lights
+BEGIN QUEUE
+END QUEUE
+END
+BEGIN willk
+NAME: William Kim
+MOVIE: Top Gun
+BEGIN QUEUE
+END QUEUE
+END
+BEGIN MacG
+NAME: Mac Goldmanthing
+MOVIE: 
+END
+BEGIN janicel
+NAME: Janice L
+MOVIE: 
+BEGIN QUEUE
+City Lights
+END QUEUE
+END
+BEGIN rtom
+NAME: Rebecca Tom
+MOVIE: 
+END
+BEGIN justinchi
+NAME: Justin Chi
+MOVIE: 
+BEGIN QUEUE
+Top Gun
+Rosemary
+END QUEUE
+BEGIN RATINGS
+END RATINGS
+END
+BEGIN jay
+NAME: jayson
+MOVIE: 
+END
+BEGIN one
+NAME: two
+MOVIE: 
+END
+BEGIN ohno
+NAME: laptop
+MOVIE: 
+END
+BEGIN anderson
+NAME: myersa
+MOVIE: 
+BEGIN QUEUE
+END QUEUE
+BEGIN RATINGS
+4 City Lights
+END RATINGS
+END
+BEGIN euannliu
+NAME: Eu-Ann Liu
+MOVIE: 
+BEGIN QUEUE
+The Princess Bride
+Top Gun
+Rosemary
+END QUEUE
+BEGIN RATINGS
+3 The Princess Bride
+5 Wargames
+END RATINGS
+END

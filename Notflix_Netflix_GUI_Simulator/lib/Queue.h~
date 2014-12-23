@@ -37,6 +37,6 @@ class Queue {
 class EmptyQueueException : public exception
 {
 	
-}
+};
 #include "QueueImp.h"
 #endif

@@ -45,8 +45,6 @@ public:
 	void add (keyType key, valueType value); 
 	void remove (keyType key);
 	void merge (const Map<keyType, valueType> & other);
-	
-	bool search (keyType key);
 
 	Map& operator = (const Map &other);
 	
@@ -55,82 +53,63 @@ public:
         public:
         	Iterator()
         	{
-        		iter.curr = NULL;
-        		temp_it = NULL;
-        	/*
-        		iter = new typename RedBlackTree<keyType, valueType>::iterator(NULL);
-        		temp_it = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
-        	*/
+        		it_pos = NULL;
         	}
-        	Iterator(typename RedBlackTree<keyType, valueType>::iterator other)
+        	Iterator(MapItem<keyType,valueType> *other)
         	{
-        		//temp_it = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
-        		//iter = new typename  RedBlackTree<keyType, valueType>::iterator(NULL);
-        		iter = other;
-        		temp_it = NULL;
+        		it_pos = other;
         	}
-        	~Iterator()
-        	{
-        		//delete iter;
-        		//delete temp_it;
-        	}
+        		
           	Pair<keyType, valueType> operator* () const
           	{
-          		pair<keyType, valueType> std_pair;
           		Pair<keyType, valueType> temp_pair;
-          		
-          		if(iter!=temp_it)
-		  	{
-		  		std_pair = *iter;
-		  		
-		  		temp_pair.first = std_pair.first;
-	      			temp_pair.second = std_pair.second;
-	      		}
+          		temp_pair.first = it_pos->key;
+      			temp_pair.second = it_pos->value;
        			return temp_pair;
            	}
            	
           	Map<keyType,valueType>::Iterator operator++ ()
           	{
-          		++iter;
-          		if(iter.curr == NULL)
+          		if(it_pos->next==NULL)
           			throw NoSuchElementException();
+          		else
+          			it_pos = it_pos->next;
           			
           		return *this;
           	}
           	
-          	Map<keyType,valueType>::Iterator operator= (const typename RedBlackTree<keyType, valueType>::iterator & other)
+          	Map<keyType,valueType>::Iterator operator= (const Map<keyType,valueType>::Iterator & other)
           	{
-          		if(RedBlackTree<keyType, valueType>::iter.curr!=other.curr)
+          		if(it_pos!=other.it_pos)
           		{
-		  		iter.curr = other.curr;
+		  		it_pos = other.it_pos;
 		  	}
           		return *this; 
           	}
 
-         	bool operator== (const typename RedBlackTree<keyType, valueType>::iterator & other) const 
+         	bool operator== (const Map<keyType,valueType>::Iterator & other) const 
             	{
-            		if(iter==other)
+            		if(it_pos==other.it_pos)
             			return true;
             		else
             			return false;
             	}
             	
-            	bool operator!= (const typename RedBlackTree<keyType, valueType>::iterator & other) const
+            	bool operator!= (const Map<keyType,valueType>::Iterator & other) const
          	{
-            		if(iter==other)
+            		if(it_pos==other.it_pos)
             			return false;
             		else
             			return true;
             	}
             	
-              	//MapItem<keyType,valueType> *it_pos;
-		typename RedBlackTree<keyType, valueType>::iterator iter;
-		typename RedBlackTree<keyType, valueType>::iterator temp_it;
+              	MapItem<keyType,valueType> *it_pos;
+
 	};
 
 	Map<keyType,valueType>::Iterator begin () const
 	{
-		return Map<keyType,valueType>::Iterator(bank->begin());
+		return Map<keyType,valueType>::Iterator(head);
 	}
 	Map<keyType,valueType>::Iterator end () const
 	{
@@ -138,7 +117,6 @@ public:
 	}
         
 private:
-	RedBlackTree<keyType, valueType> *bank;
 	MapItem <keyType, valueType> *head, *tail, *there;
 
 	int num; //How many items are currently in this linked list

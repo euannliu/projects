@@ -1,17 +1,9 @@
-
+Notflix Movie Simulator
+===
 Eu-Ann Liu
-2943485444
-euannliu@usc.edu
-
-Type:
-qmake -project
-qmake
-make
-
-^to compile
-
-
-
-./Notflix_Netflix_GUI_Simulator input.txt
-
-^to run
+---
+- compile: "make"
+- run: "./Project4 input.txt"
+- Utilizes: Maps, Sets, Red-Black Trees, Queues, Qt
+- All of these besides Qt are self-coded
+- Would recommend modifying user.txt or movie.txt to see what is in the database

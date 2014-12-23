@@ -8,6 +8,11 @@ Queue<T>::Queue()
 }
 
 template <class T>
+Queue<T>::~Queue()
+{
+}
+
+template <class T>
 void Queue<T>::enqueue (const T & item)
 {
 	Title<T> *temp;
@@ -50,7 +55,7 @@ void Queue<T>::dequeue ()
 }
 
 template <class T>
-const T & Queue<T>::peekfront()
+const T & Queue<T>::peekFront()
 {
 	if(tail==NULL)
 		throw EmptyQueueException();

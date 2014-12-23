@@ -36,110 +36,25 @@ int Set<T>::size() const
 template<class T>
 void Set<T>::add(const T item)
 {
-	Pair<int,T> thepair;
-	typename Map<int,T>::Iterator iterate;
-	iterate = internalStorage.begin();
-	bool isin = false;
-	for(int i=0;i<index;i++) //Check to see if there is the item is in the bank
-	{
-		thepair=*iterate;
-		if(thepair.second==item)
-		{
-			isin=true;
-			break;
-		}
-		try
-		{
-			++iterate;
-		}
-		catch(NoSuchElementException &e)
-		{
-		}
-	}
-	if(!isin)
-	{
-		internalStorage.add(index,item);
-		index++;
-	}
+	internalStorage.add(item,0);
 }
 
 template<class T>
 void Set<T>::remove(const T item)
 {
-	Pair<int,T> thepair;
-	typename Map<int,T>::Iterator iterate;
-	iterate = internalStorage.begin();
-	int current=-1;
-	T hold;
-	for(int i=0;i<index;i++) //Check to see if there is the item is in the bank
-	{
-		thepair=*iterate;
-		if(thepair.second==item)
-		{
-			current=thepair.first; //pulls the index of that item
-			break;
-		}
-		try
-		{
-			++iterate;
-		}
-		catch(NoSuchElementException &e)
-		{
-		}
-	}
-	if(current>=0) //if there is an item...
-	{
-		internalStorage.remove(current); //remove that item
-		iterate = internalStorage.begin();
-		for(int i=current+1;i<index;i++) //shift all the index of the next items back one
-		{
-			thepair=*iterate;
-			hold=thepair.second;
-			internalStorage.remove(i);
-			internalStorage.add(i-1,hold);
-			try
-			{
-				++iterate;
-			}
-			catch(NoSuchElementException &e)
-			{
-			}
-		}
-		index--;
-	}
+	internalStorage.remove(item);
 }
 
 template<class T>
-bool Set<T>::contains(T item) const
+bool Set<T>::contains(T item)
 {
-	Pair<int,T> thepair;
-	typename Map<int,T>::Iterator iterate;
-	iterate = internalStorage.begin();
-	bool success=false;
-	for(int i=0;i<index;i++) //search by value
-	{
-		thepair = *iterate;
-		if(thepair.second==item)
-		{
-			success=true; 
-			break;
-		}
-		try
-		{
-			++iterate;
-		}
-		catch(NoSuchElementException &e)
-		{
-			break;
-		}
-	}
-	return success;
+	return internalStorage.search(item);
 }
 
 template<class T>
 void Set<T>::merge(const Set<T> & other)
 {
-	Map<int,T> temp;
+	Map<T,int> temp;
 	int total=other.size();
 	T hold;
 	Set<T>::Iterator iterate;
@@ -213,7 +128,6 @@ Set<T> Set<T>::Intersection (const Set<T> & other) const
 	union_iterator = begin();
 	while(size()>0)
 	{
-		cout << *union_iterator << endl;
 		temp_vector.push_back(*union_iterator);
 		try
 		{
@@ -227,7 +141,6 @@ Set<T> Set<T>::Intersection (const Set<T> & other) const
 	union_iterator = other.begin();
 	while(other.size()>0)
 	{
-		cout << *union_iterator << endl;
 		temp_vector.push_back(*union_iterator);
 		try
 		{
@@ -242,10 +155,8 @@ Set<T> Set<T>::Intersection (const Set<T> & other) const
 	MergeSort<T> sorter;
 	temp_vector = sorter.sort(temp_vector);
 
-	cout << "vector" << endl;
 	for(int i=0; i<temp_vector.size(); i++)
 	{
-		cout << temp_vector[i] << endl;
 		if((temp_vector.size()>1) && (temp_vector[i]==temp_vector[i+1]))
 			temp_set.add(temp_vector[i]);
 	}

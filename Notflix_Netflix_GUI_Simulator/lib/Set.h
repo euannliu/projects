@@ -18,7 +18,7 @@ class Set
     void remove (const T item);
      /* Removes the item from the set.
         If the item was not in the set, it should do nothing. */
-    bool contains (T item) const;
+    bool contains (T item);
      /* Returns whether the item is in the set. */
     void merge (const Set<T> & other);
      /* Adds all elements of other to this set. 
@@ -35,53 +35,53 @@ class Set
         public:
         	Iterator()
         	{
-        		it = new typename Map<int, T>::Iterator(NULL);
+        		//it = new typename Map<T,int>::Iterator();
         	}
-        	Iterator(const Map<int, T> * storage, bool at_beginning) //at_beginning checks whether to call Map's Iterator's begin or end
+        	Iterator(const Map<T,int> * storage, bool at_beginning) //at_beginning checks whether to call Map's Iterator's begin or end
         	{
         		iS_p = storage;
-        		it = new typename Map<int, T>::Iterator;
+        		//it = new typename Map<T,int>::Iterator;
         		if(at_beginning)
-        			*it = storage->begin();
+        			it = storage->begin();
         		else
-        			*it = storage->end();
+        			it = storage->end();
         	}
         	
           	T operator* () const
           	{
-          		Pair<int, T> *temp_pair;
-          		temp_pair = new Pair<int, T>;
-          		*temp_pair = **it;
-          		return temp_pair->second;          		
+          		Pair<T,int> *temp_pair;
+          		temp_pair = new Pair<T,int>;
+          		*temp_pair = *it;
+          		return temp_pair->first;          		
           	}
           	Set<T>::Iterator operator++ ()
           	{
-          		++*it; //this an issue?
+          		++it; //this an issue?
           		return *this;
           	}
           	Set<T>::Iterator operator= (const Set<T>::Iterator & other)
           	{
-          		it->it_pos = other.it->it_pos;
+          		it.iter = other.it.iter;
           		return *this;
           	}
          	bool operator== (const Set<T>::Iterator & other) const
          	{
-            		if(it->it_pos==other.it->it_pos)
+            		if(it.iter==other.it.iter)
             			return true;
             		else
             			return false;
          	}
             	bool operator!= (const Set<T>::Iterator & other) const //FIX THIS
             	{
-            		if(it->it_pos==other.it->it_pos)
+            		if(it.iter==other.it.iter)
             			return false;
             		else
             			return true;            	
             	}
             	
         private:
-		typename Map<int, T>::Iterator *it;
-		const Map<int, T> *iS_p;
+		typename Map<T,int>::Iterator it;
+		const Map<T,int> *iS_p;
 	};
 
 	Set<T>::Iterator begin () const
@@ -96,7 +96,7 @@ class Set
 
 	friend class Set<T>::Iterator;
 private:
-	Map<int, T> internalStorage;
+	Map<T,int> internalStorage;
 	int index;
 };
 #include "SetImp.h"
